@@ -1,0 +1,19 @@
+start: 
+
+brew services start postgresql@16
+
+
+stop:
+
+brew services stop postgresql@16
+
+
+Run the npx drizzle-kit generate command to generate the migration files based on our current schema state.
+
+to migrate: npx drizzle-kit migrate
+
+
+SQL queries I ran in psql:
+
+CREATE DATABASE gator;
+\c gator  

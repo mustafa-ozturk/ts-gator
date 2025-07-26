@@ -1,4 +1,4 @@
-import { setUser } from "./config";
+import { setUser } from "../config";
 
 export const handlerLogin = (cmdName: string, ...args: string[]) => {
   if (args.length !== 0) {
