@@ -8,6 +8,20 @@
       "when": 1753490257314,
       "tag": "0000_wonderful_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753564339006,
+      "tag": "0001_modern_peter_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753566887573,
+      "tag": "0002_groovy_deathstrike",
+      "breakpoints": true
     }
   ]
 }
