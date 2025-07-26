@@ -2,8 +2,9 @@ import {
   createUser,
   deleteUsers,
   getUserByName,
+  getUsers,
 } from "../lib/db/queries/users";
-import { setUser } from "../config";
+import { readConfig, setUser } from "../config";
 
 export const handlerLogin = async (cmdName: string, ...args: string[]) => {
   if (args.length !== 1) {
@@ -39,5 +40,15 @@ export const handlerReset = async (cmdName: string, ...args: string[]) => {
   } catch (error) {
     console.log("couldn't delete all users:");
     console.log(error);
+  }
+};
+
+export const handlerUsers = async (cmdName: string, ...args: string[]) => {
+  const config = readConfig();
+  const users = await getUsers();
+
+  for (const user of users) {
+    const isCurrent = config.currentUserName === user.name;
+    console.log(` * ${user.name}${isCurrent ? " (current)" : ""}`);
   }
 };
