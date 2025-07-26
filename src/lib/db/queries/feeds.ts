@@ -9,3 +9,8 @@ export const createFeed = async (name: string, url: string, userId: string) => {
     .returning();
   return result;
 };
+
+export const getFeeds = async () => {
+  const results = await db.select().from(feeds);
+  return results;
+};

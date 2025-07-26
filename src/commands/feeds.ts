@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { readConfig } from "src/config";
-import { createFeed } from "src/lib/db/queries/feeds";
-import { getUserByName } from "src/lib/db/queries/users";
+import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
+import { getUserById, getUserByName } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
 
 type RSSFeed = {
@@ -90,4 +90,16 @@ export const handlerAddFeed = async (cmdName: string, ...args: string[]) => {
 export const printFeed = (feed: Feed, user: User) => {
   console.log("feed", feed);
   console.log("user", user);
+};
+
+export const handlerFeeds = async (cmdName: string, ...args: string[]) => {
+  const feeds = await getFeeds();
+  for (const feed of feeds) {
+    const user = await getUserById(feed.userId);
+    console.log(`
+- name: ${feed.name} 
+- url:  ${feed.url}
+- username: ${user.name}
+`);
+  }
 };
