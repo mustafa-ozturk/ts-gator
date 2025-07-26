@@ -3,9 +3,9 @@ import {
   registerCommand,
   runCommand,
 } from "./commands/commands";
-import { handlerLogin } from "./commands/users";
+import { handlerLogin, handlerRegister } from "./commands/users";
 
-const main = () => {
+const main = async () => {
   const args = process.argv.slice(2);
 
   if (args.length < 1) {
@@ -17,9 +17,10 @@ const main = () => {
   const commandsRegistry: CommandsRegistry = {};
 
   registerCommand(commandsRegistry, "login", handlerLogin);
+  registerCommand(commandsRegistry, "register", handlerRegister);
 
   try {
-    runCommand(commandsRegistry, cmdName, ...cmdArgs);
+    await runCommand(commandsRegistry, cmdName, ...cmdArgs);
   } catch (err) {
     if (err instanceof Error) {
       console.error(`Error running command ${cmdName}: ${err.message}`);
@@ -29,6 +30,8 @@ const main = () => {
 
     process.exit(1);
   }
+
+  process.exit(0);
 };
 
 main();
