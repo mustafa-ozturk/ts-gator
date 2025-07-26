@@ -12,3 +12,7 @@ export const getUserByName = async (name: string) => {
   const [result] = await db.select().from(users).where(eq(users.name, name));
   return result;
 };
+
+export const deleteUsers = async () => {
+  await db.delete(users);
+};

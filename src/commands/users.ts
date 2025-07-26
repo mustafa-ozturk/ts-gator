@@ -1,4 +1,8 @@
-import { createUser, getUserByName } from "../lib/db/queries/users";
+import {
+  createUser,
+  deleteUsers,
+  getUserByName,
+} from "../lib/db/queries/users";
 import { setUser } from "../config";
 
 export const handlerLogin = async (cmdName: string, ...args: string[]) => {
@@ -26,4 +30,14 @@ export const handlerRegister = async (cmdName: string, ...args: string[]) => {
   console.log(
     `user: ${userName} was succesfully created and registered with id ${result.id}`
   );
+};
+
+export const handlerReset = async (cmdName: string, ...args: string[]) => {
+  try {
+    await deleteUsers();
+    console.log("succesfully deleted all users");
+  } catch (error) {
+    console.log("couldn't delete all users:");
+    console.log(error);
+  }
 };
