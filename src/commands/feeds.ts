@@ -77,14 +77,14 @@ export const handlerAgg = async (cmdName: string, ...args: string[]) => {
   console.log(result);
 };
 
-export const handlerAddFeed = async (cmdName: string, ...args: string[]) => {
+export const handlerAddFeed = async (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => {
   if (args.length !== 2) {
     throw new Error(`usage: ${cmdName} <name> <url>`);
   }
-
-  const { currentUserName } = readConfig();
-  const user = await getUserByName(currentUserName);
-  const feed = await fetchFeed(args[1]);
 
   const result = await createFeed(args[0], args[1], user.id);
   printFeed(result, user);
@@ -114,13 +114,16 @@ export const handlerFeeds = async (cmdName: string, ...args: string[]) => {
   }
 };
 
-export const handlerFollow = async (cmdName: string, ...args: string[]) => {
+export const handlerFollow = async (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => {
   if (args.length !== 1) {
     throw new Error(`usage: ${cmdName} <url>`);
   }
 
   const { currentUserName } = readConfig();
-  const user = await getUserByName(currentUserName);
   const feed = await getFeedByUrl(args[0]);
   if (!feed) {
     throw new Error(`feed not found`);
@@ -133,9 +136,12 @@ export const handlerFollow = async (cmdName: string, ...args: string[]) => {
   );
 };
 
-export const handlerFollowing = async (cmdName: string, ...args: string[]) => {
+export const handlerFollowing = async (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => {
   const { currentUserName } = readConfig();
-  const user = await getUserByName(currentUserName);
   const feeds = await getFeedFollowsForUser(user.id);
   for (const feed of feeds) {
     console.log(`
