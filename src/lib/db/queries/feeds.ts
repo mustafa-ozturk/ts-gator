@@ -14,3 +14,8 @@ export const getFeeds = async () => {
   const results = await db.select().from(feeds);
   return results;
 };
+
+export const getFeedByUrl = async (url: string) => {
+  const [result] = await db.select().from(feeds).where(eq(feeds.url, url));
+  return result;
+};

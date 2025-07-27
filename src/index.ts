@@ -3,7 +3,13 @@ import {
   registerCommand,
   runCommand,
 } from "./commands/commands";
-import { handlerAddFeed, handlerAgg, handlerFeeds } from "./commands/feeds";
+import {
+  handlerAddFeed,
+  handlerAgg,
+  handlerFeeds,
+  handlerFollow,
+  handlerFollowing,
+} from "./commands/feeds";
 import {
   handlerLogin,
   handlerRegister,
@@ -29,6 +35,8 @@ const main = async () => {
   registerCommand(commandsRegistry, "agg", handlerAgg);
   registerCommand(commandsRegistry, "addfeed", handlerAddFeed);
   registerCommand(commandsRegistry, "feeds", handlerFeeds);
+  registerCommand(commandsRegistry, "follow", handlerFollow);
+  registerCommand(commandsRegistry, "following", handlerFollowing);
 
   try {
     await runCommand(commandsRegistry, cmdName, ...cmdArgs);

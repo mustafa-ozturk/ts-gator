@@ -1,6 +1,10 @@
 import { XMLParser } from "fast-xml-parser";
 import { readConfig } from "src/config";
-import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
+import {
+  createFeedFollow,
+  getFeedFollowsForUser,
+} from "src/lib/db/queries/feed_follows";
+import { createFeed, getFeedByUrl, getFeeds } from "src/lib/db/queries/feeds";
 import { getUserById, getUserByName } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
 
@@ -85,6 +89,12 @@ export const handlerAddFeed = async (cmdName: string, ...args: string[]) => {
   const result = await createFeed(args[0], args[1], user.id);
   printFeed(result, user);
   console.log(`feed succesfully created with ${result.id}`);
+
+  const feedFollows = await createFeedFollow(user.id, result.id);
+
+  console.log(
+    `feedFollow record created with user name: ${feedFollows.userName} and feed name: ${feedFollows.feedName}`
+  );
 };
 
 export const printFeed = (feed: Feed, user: User) => {
@@ -100,6 +110,37 @@ export const handlerFeeds = async (cmdName: string, ...args: string[]) => {
 - name: ${feed.name} 
 - url:  ${feed.url}
 - username: ${user.name}
+`);
+  }
+};
+
+export const handlerFollow = async (cmdName: string, ...args: string[]) => {
+  if (args.length !== 1) {
+    throw new Error(`usage: ${cmdName} <url>`);
+  }
+
+  const { currentUserName } = readConfig();
+  const user = await getUserByName(currentUserName);
+  const feed = await getFeedByUrl(args[0]);
+  if (!feed) {
+    throw new Error(`feed not found`);
+  }
+
+  const feedFollows = await createFeedFollow(user.id, feed.id);
+
+  console.log(
+    `feedFollow record created with user name: ${feedFollows.userName} and feed name: ${feedFollows.feedName}`
+  );
+};
+
+export const handlerFollowing = async (cmdName: string, ...args: string[]) => {
+  const { currentUserName } = readConfig();
+  const user = await getUserByName(currentUserName);
+  const feeds = await getFeedFollowsForUser(user.id);
+  for (const feed of feeds) {
+    console.log(`
+${user.name} is following feeds:
+- ${feed.feedName}
 `);
   }
 };
