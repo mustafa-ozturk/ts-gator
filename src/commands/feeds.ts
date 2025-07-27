@@ -2,6 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import { readConfig } from "src/config";
 import {
   createFeedFollow,
+  deleteFeedFollow,
   getFeedFollowsForUser,
 } from "src/lib/db/queries/feed_follows";
 import { createFeed, getFeedByUrl, getFeeds } from "src/lib/db/queries/feeds";
@@ -123,7 +124,6 @@ export const handlerFollow = async (
     throw new Error(`usage: ${cmdName} <url>`);
   }
 
-  const { currentUserName } = readConfig();
   const feed = await getFeedByUrl(args[0]);
   if (!feed) {
     throw new Error(`feed not found`);
@@ -141,7 +141,6 @@ export const handlerFollowing = async (
   user: User,
   ...args: string[]
 ) => {
-  const { currentUserName } = readConfig();
   const feeds = await getFeedFollowsForUser(user.id);
   for (const feed of feeds) {
     console.log(`
@@ -149,4 +148,21 @@ ${user.name} is following feeds:
 - ${feed.feedName}
 `);
   }
+};
+
+export const handlerUnfollow = async (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => {
+  if (args.length !== 1) {
+    throw new Error(`usage: ${cmdName} <url>`);
+  }
+  const feed = await getFeedByUrl(args[0]);
+  if (!feed) {
+    throw new Error(`feed not found`);
+  }
+
+  await deleteFeedFollow(user.id, feed.id);
+  console.log("deleted feed follow!");
 };
