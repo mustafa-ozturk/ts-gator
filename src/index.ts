@@ -6,6 +6,7 @@ import {
 import {
   handlerAddFeed,
   handlerAgg,
+  handlerBrowse,
   handlerFeeds,
   handlerFollow,
   handlerFollowing,
@@ -56,6 +57,11 @@ const main = async () => {
     commandsRegistry,
     "unfollow",
     middlewareLoggedIn(handlerUnfollow)
+  );
+  registerCommand(
+    commandsRegistry,
+    "browse",
+    middlewareLoggedIn(handlerBrowse)
   );
 
   try {

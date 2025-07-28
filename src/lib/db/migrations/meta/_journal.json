@@ -43,6 +43,13 @@
       "when": 1753662304605,
       "tag": "0005_faithful_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753670081078,
+      "tag": "0006_black_jetstream",
+      "breakpoints": true
     }
   ]
 }

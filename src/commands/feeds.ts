@@ -12,6 +12,7 @@ import {
   getNextFeedToFetch,
   markFeedFetched,
 } from "src/lib/db/queries/feeds";
+import { createPost, getPostsForUser } from "src/lib/db/queries/posts";
 import { getUserById, getUserByName } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
 
@@ -207,21 +208,58 @@ export const handlerUnfollow = async (
   await deleteFeedFollow(user.id, feed.id);
   console.log("deleted feed follow!");
 };
+const parseRSSDate = (pubDate: string): Date => {
+  // Try parsing the date - RSS dates are usually RFC 2822 format
+  const date = new Date(pubDate);
+
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    console.warn(`Invalid pubDate: ${pubDate}, using current date instead`);
+    return new Date();
+  }
+
+  return date;
+};
 
 export const scrapeFeeds = async () => {
   try {
     const nextFeedToFetch = await getNextFeedToFetch();
     markFeedFetched(nextFeedToFetch.id);
     const feed = await fetchFeed(nextFeedToFetch.url);
-    console.log(`==========`);
-    console.log(`- ${feed.title}`);
-    console.log(`- ${feed.description}`);
-    console.log(`-----`);
+    // console.log(`==========`);
+    // console.log(`- ${feed.title}`);
+    // console.log(`- ${feed.description}`);
+    // console.log(`-----`);
+    // for (const item of feed.items) {
+    //   console.log(`- ${item.title}`);
+    // }
+    // console.log(`==========`);
     for (const item of feed.items) {
-      console.log(`- ${item.title}`);
+      const post = await createPost(
+        item.title,
+        item.link,
+        item.description,
+        nextFeedToFetch.id,
+        parseRSSDate(item.pubDate)
+      );
+      console.log(`post with id ${post.id} created`);
     }
-    console.log(`==========`);
   } catch (error) {
     console.log(`Failed to scrape feeds:`, error);
   }
+};
+
+export const handlerBrowse = async (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => {
+  let limit = null;
+  if (args.length === 1) {
+    limit = Number(args[0]);
+  }
+
+  const posts = await getPostsForUser(user.id, limit !== null ? limit : 2);
+
+  posts.forEach((post) => console.log(post.title));
 };
