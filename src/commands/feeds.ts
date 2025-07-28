@@ -5,7 +5,13 @@ import {
   deleteFeedFollow,
   getFeedFollowsForUser,
 } from "src/lib/db/queries/feed_follows";
-import { createFeed, getFeedByUrl, getFeeds } from "src/lib/db/queries/feeds";
+import {
+  createFeed,
+  getFeedByUrl,
+  getFeeds,
+  getNextFeedToFetch,
+  markFeedFetched,
+} from "src/lib/db/queries/feeds";
 import { getUserById, getUserByName } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
 
@@ -73,9 +79,44 @@ export const fetchFeed = async (feedURL: string) => {
   };
 };
 
+export const parseDuration = (durationStr: string): number => {
+  const regex = /^(\d+)(ms|s|m|h)$/;
+  const match = durationStr.match(regex);
+  if (!match) {
+    throw new Error("regex doesn't match");
+  }
+  const num = Number(match[1]);
+  if (match[2] === "s") {
+    return num * 1000;
+  }
+  if (match[2] === "m") {
+    return num * 60 * 1000;
+  }
+  if (match[2] === "h") {
+    return num * 60 * 60 * 1000;
+  }
+  return num;
+};
+
 export const handlerAgg = async (cmdName: string, ...args: string[]) => {
-  const result = await fetchFeed("https://www.wagslane.dev/index.xml");
-  console.log(result);
+  if (args.length !== 1) {
+    throw new Error(`usage: ${cmdName} <time_between_reqs>`);
+  }
+  console.log(`Collecting feeds every ${args[0]}`);
+  const durationMs = parseDuration(args[0]);
+
+  // scrapeFeeds().catch((e) => console.log(e));
+  const interval = setInterval(() => {
+    scrapeFeeds().catch((e) => console.log(e));
+  }, durationMs);
+
+  await new Promise<void>((resolve) => {
+    process.on("SIGINT", () => {
+      console.log("shutting down feed aggregator...");
+      clearInterval(interval);
+      resolve();
+    });
+  });
 };
 
 export const handlerAddFeed = async (
@@ -165,4 +206,22 @@ export const handlerUnfollow = async (
 
   await deleteFeedFollow(user.id, feed.id);
   console.log("deleted feed follow!");
+};
+
+export const scrapeFeeds = async () => {
+  try {
+    const nextFeedToFetch = await getNextFeedToFetch();
+    markFeedFetched(nextFeedToFetch.id);
+    const feed = await fetchFeed(nextFeedToFetch.url);
+    console.log(`==========`);
+    console.log(`- ${feed.title}`);
+    console.log(`- ${feed.description}`);
+    console.log(`-----`);
+    for (const item of feed.items) {
+      console.log(`- ${item.title}`);
+    }
+    console.log(`==========`);
+  } catch (error) {
+    console.log(`Failed to scrape feeds:`, error);
+  }
 };

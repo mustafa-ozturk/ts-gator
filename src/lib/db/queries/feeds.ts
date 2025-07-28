@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "../index";
 import { feeds } from "../schema";
 
@@ -17,5 +17,22 @@ export const getFeeds = async () => {
 
 export const getFeedByUrl = async (url: string) => {
   const [result] = await db.select().from(feeds).where(eq(feeds.url, url));
+  return result;
+};
+
+export const markFeedFetched = async (feedId: string) => {
+  const now = new Date();
+  await db
+    .update(feeds)
+    .set({ lastFetchedAt: now, updatedAt: now })
+    .where(eq(feeds.id, feedId));
+};
+
+export const getNextFeedToFetch = async () => {
+  const [result] = await db
+    .select()
+    .from(feeds)
+    .orderBy(sql`last_fetched_at ASC NULLS FIRST`)
+    .limit(1);
   return result;
 };
